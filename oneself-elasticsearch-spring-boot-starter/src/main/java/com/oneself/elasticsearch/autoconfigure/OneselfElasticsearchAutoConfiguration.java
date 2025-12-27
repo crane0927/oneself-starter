@@ -1,7 +1,7 @@
 package com.oneself.elasticsearch.autoconfigure;
 
-import java.net.URI;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -15,12 +15,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
+import co.elastic.clients.elasticsearch._helpers.bulk.BulkIngester;
 
 import com.oneself.elasticsearch.core.ElasticsearchOps;
 
@@ -39,9 +41,8 @@ public class OneselfElasticsearchAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(RestClient.class)
     public RestClient restClient(OneselfElasticsearchProperties properties) {
-        HttpHost[] hosts = Arrays.stream(properties.getUris())
-                .map(URI::create)
-                .map(uri -> new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme()))
+        HttpHost[] hosts = Arrays.stream(splitUris(properties.getUris()))
+                .map(uri -> parseHost(uri, properties.getScheme()))
                 .toList()
                 .toArray(new HttpHost[0]);
         RestClientBuilder builder = RestClient.builder(hosts)
@@ -74,11 +75,47 @@ public class OneselfElasticsearchAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public ElasticsearchOps elasticsearchOps(ElasticsearchClient client, OneselfElasticsearchProperties properties) {
-        return new ElasticsearchOps(client, properties);
+    public ElasticsearchOps elasticsearchOps(ElasticsearchClient client,
+                                            OneselfElasticsearchProperties properties,
+                                            ObjectProvider<BulkIngester<Object>> bulkIngester) {
+        return new ElasticsearchOps(client, properties, bulkIngester.getIfAvailable());
+    }
+
+    /**
+     * Bulk 写入器。
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(prefix = "oneself.elasticsearch", name = "bulk-enabled", havingValue = "true", matchIfMissing = true)
+    public BulkIngester<Object> bulkIngester(ElasticsearchClient client, OneselfElasticsearchProperties properties) {
+        return BulkIngester.of(builder -> builder
+                .client(client)
+                .maxOperations(properties.getBulkMaxOperations())
+                .flushInterval(properties.getBulkFlushInterval().toMillis(), TimeUnit.MILLISECONDS));
     }
 
     private boolean hasText(String value) {
         return value != null && !value.isBlank();
+    }
+
+    private String[] splitUris(String uris) {
+        if (uris == null || uris.isBlank()) {
+            return new String[0];
+        }
+        return Arrays.stream(uris.split(","))
+                .map(String::trim)
+                .filter(item -> !item.isEmpty())
+                .toArray(String[]::new);
+    }
+
+    private HttpHost parseHost(String host, String scheme) {
+        String[] parts = host.split(":", 2);
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("Invalid elasticsearch uri, expected ip:port but got: " + host);
+        }
+        String hostname = parts[0].trim();
+        int port = Integer.parseInt(parts[1].trim());
+        String realScheme = hasText(scheme) ? scheme : "http";
+        return new HttpHost(hostname, port, realScheme);
     }
 }

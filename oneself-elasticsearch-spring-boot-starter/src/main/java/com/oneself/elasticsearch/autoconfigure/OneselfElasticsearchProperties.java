@@ -16,9 +16,14 @@ public class OneselfElasticsearchProperties {
     private boolean enabled = true;
 
     /**
-     * 节点地址列表。
+     * 节点地址列表（ip:port 逗号分隔）。
      */
-    private String[] uris = new String[] {"http://localhost:9200"};
+    private String uris = "127.0.0.1:9200";
+
+    /**
+     * 协议（http/https）。
+     */
+    private String scheme = "http";
 
     /**
      * 用户名。
@@ -46,6 +51,31 @@ public class OneselfElasticsearchProperties {
     private String indexPrefix = "";
 
     /**
+     * 是否启用 Bulk。
+     */
+    private boolean bulkEnabled = true;
+
+    /**
+     * Bulk 单批最大操作数。
+     */
+    private int bulkMaxOperations = 1000;
+
+    /**
+     * Bulk 单批最大字节数。
+     */
+    private long bulkMaxBytes = 5 * 1024 * 1024;
+
+    /**
+     * Bulk 刷新间隔。
+     */
+    private Duration bulkFlushInterval = Duration.ofSeconds(1);
+
+    /**
+     * Bulk 并发请求数。
+     */
+    private int bulkConcurrentRequests = 1;
+
+    /**
      * 是否Enabled。
      */
     public boolean isEnabled() {
@@ -62,15 +92,29 @@ public class OneselfElasticsearchProperties {
     /**
      * 获取Uris。
      */
-    public String[] getUris() {
+    public String getUris() {
         return uris;
     }
 
     /**
      * 设置Uris。
      */
-    public void setUris(String[] uris) {
+    public void setUris(String uris) {
         this.uris = uris;
+    }
+
+    /**
+     * 获取Scheme。
+     */
+    public String getScheme() {
+        return scheme;
+    }
+
+    /**
+     * 设置Scheme。
+     */
+    public void setScheme(String scheme) {
+        this.scheme = scheme;
     }
 
     /**
@@ -141,5 +185,75 @@ public class OneselfElasticsearchProperties {
      */
     public void setIndexPrefix(String indexPrefix) {
         this.indexPrefix = indexPrefix;
+    }
+
+    /**
+     * 是否BulkEnabled。
+     */
+    public boolean isBulkEnabled() {
+        return bulkEnabled;
+    }
+
+    /**
+     * 设置BulkEnabled。
+     */
+    public void setBulkEnabled(boolean bulkEnabled) {
+        this.bulkEnabled = bulkEnabled;
+    }
+
+    /**
+     * 获取BulkMaxOperations。
+     */
+    public int getBulkMaxOperations() {
+        return bulkMaxOperations;
+    }
+
+    /**
+     * 设置BulkMaxOperations。
+     */
+    public void setBulkMaxOperations(int bulkMaxOperations) {
+        this.bulkMaxOperations = bulkMaxOperations;
+    }
+
+    /**
+     * 获取BulkMaxBytes。
+     */
+    public long getBulkMaxBytes() {
+        return bulkMaxBytes;
+    }
+
+    /**
+     * 设置BulkMaxBytes。
+     */
+    public void setBulkMaxBytes(long bulkMaxBytes) {
+        this.bulkMaxBytes = bulkMaxBytes;
+    }
+
+    /**
+     * 获取BulkFlushInterval。
+     */
+    public Duration getBulkFlushInterval() {
+        return bulkFlushInterval;
+    }
+
+    /**
+     * 设置BulkFlushInterval。
+     */
+    public void setBulkFlushInterval(Duration bulkFlushInterval) {
+        this.bulkFlushInterval = bulkFlushInterval;
+    }
+
+    /**
+     * 获取BulkConcurrentRequests。
+     */
+    public int getBulkConcurrentRequests() {
+        return bulkConcurrentRequests;
+    }
+
+    /**
+     * 设置BulkConcurrentRequests。
+     */
+    public void setBulkConcurrentRequests(int bulkConcurrentRequests) {
+        this.bulkConcurrentRequests = bulkConcurrentRequests;
     }
 }
