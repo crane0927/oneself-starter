@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration;
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -35,8 +36,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 /**
  * Kafka Starter 自动装配。
  */
-@AutoConfiguration
-@EnableConfigurationProperties(OneselfKafkaProperties.class)
+@AutoConfiguration(before = KafkaAutoConfiguration.class)
+@EnableConfigurationProperties({OneselfKafkaProperties.class, KafkaProperties.class})
 @ConditionalOnClass(KafkaTemplate.class)
 @ConditionalOnProperty(prefix = "oneself.kafka", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class OneselfKafkaAutoConfiguration {
@@ -47,7 +48,7 @@ public class OneselfKafkaAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(prefix = "oneself.kafka", name = "producer-enabled", havingValue = "true", matchIfMissing = true)
-    public KafkaOps kafkaOps(KafkaTemplate<String, Object> kafkaTemplate, OneselfKafkaProperties properties) {
+    public KafkaOps kafkaOps(KafkaTemplate<Object, Object> kafkaTemplate, OneselfKafkaProperties properties) {
         return new KafkaOps(kafkaTemplate, properties);
     }
 
@@ -57,7 +58,7 @@ public class OneselfKafkaAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(ProducerFactory.class)
     @ConditionalOnProperty(prefix = "oneself.kafka", name = "idempotence-enabled", havingValue = "true", matchIfMissing = true)
-    public ProducerFactory<String, Object> kafkaProducerFactory(KafkaProperties kafkaProperties,
+    public ProducerFactory<Object, Object> kafkaProducerFactory(KafkaProperties kafkaProperties,
                                                                 OneselfKafkaProperties properties) {
         Map<String, Object> configs = kafkaProperties.buildProducerProperties();
         applyConnectionSettings(configs, properties);
@@ -84,7 +85,7 @@ public class OneselfKafkaAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(ProducerFactory.class)
     @ConditionalOnProperty(prefix = "oneself.kafka", name = "idempotence-enabled", havingValue = "false")
-    public ProducerFactory<String, Object> kafkaProducerFactoryNonIdempotent(KafkaProperties kafkaProperties,
+    public ProducerFactory<Object, Object> kafkaProducerFactoryNonIdempotent(KafkaProperties kafkaProperties,
                                                                              OneselfKafkaProperties properties) {
         Map<String, Object> configs = kafkaProperties.buildProducerProperties();
         applyConnectionSettings(configs, properties);

@@ -18,14 +18,14 @@ import com.oneself.kafka.autoconfigure.OneselfKafkaProperties;
  */
 public class KafkaOps {
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<Object, Object> kafkaTemplate;
     private final OneselfKafkaProperties properties;
     private final KafkaKeyResolver keyResolver;
 
     /**
      * 构造 KafkaOps。
      */
-    public KafkaOps(KafkaTemplate<String, Object> kafkaTemplate, OneselfKafkaProperties properties) {
+    public KafkaOps(KafkaTemplate<Object, Object> kafkaTemplate, OneselfKafkaProperties properties) {
         this.kafkaTemplate = kafkaTemplate;
         this.properties = properties;
         this.keyResolver = new KafkaKeyResolver();
