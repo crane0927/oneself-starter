@@ -14,6 +14,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 import com.oneself.redis.autoconfigure.OneselfRedisProperties;
 
+/**
+ * Redis 常用操作封装，支持 key 前缀、校验与指标/日志采集。
+ */
 public class RedisOps {
 
     private static final Logger log = LoggerFactory.getLogger(RedisOps.class);
@@ -26,6 +29,9 @@ public class RedisOps {
     private final boolean loggingEnabled;
     private final MeterRegistry meterRegistry;
 
+    /**
+     * 构造 RedisOps。
+     */
     public RedisOps(RedisTemplate<String, Object> redisTemplate,
                     OneselfRedisProperties properties,
                     MeterRegistry meterRegistry) {
@@ -38,6 +44,9 @@ public class RedisOps {
         this.meterRegistry = meterRegistry;
     }
 
+    /**
+     * 设置 key，支持可选 TTL。
+     */
     public void set(String key, Object value, Duration ttl) {
         run("set", () -> {
             String realKey = prefix(key);
@@ -49,14 +58,23 @@ public class RedisOps {
         });
     }
 
+    /**
+     * 获取 key 对应的值。
+     */
     public Optional<Object> get(String key) {
         return execute("get", () -> Optional.ofNullable(redisTemplate.opsForValue().get(prefix(key))));
     }
 
+    /**
+     * 删除 key。
+     */
     public Boolean delete(String key) {
         return execute("delete", () -> redisTemplate.delete(prefix(key)));
     }
 
+    /**
+     * 追加前缀并进行规则校验。
+     */
     private String prefix(String key) {
         if (key == null || key.isBlank()) {
             throw new IllegalArgumentException("Redis key must not be blank");
@@ -67,6 +85,9 @@ public class RedisOps {
         return validateKey(keyPrefix + ":" + key);
     }
 
+    /**
+     * 根据配置校验 key 合法性。
+     */
     private String validateKey(String key) {
         if (!validateKeyPattern) {
             return key;
@@ -77,6 +98,9 @@ public class RedisOps {
         return key;
     }
 
+    /**
+     * 执行无返回值操作。
+     */
     private void run(String operation, Runnable action) {
         execute(operation, () -> {
             action.run();
@@ -84,6 +108,9 @@ public class RedisOps {
         });
     }
 
+    /**
+     * 执行带返回值操作，统一采集指标/日志。
+     */
     private <T> T execute(String operation, Supplier<T> action) {
         long startNanos = System.nanoTime();
         try {
@@ -102,6 +129,9 @@ public class RedisOps {
         }
     }
 
+    /**
+     * 记录指标。
+     */
     private void recordMetrics(String operation, long startNanos, boolean success) {
         if (!metricsEnabled || meterRegistry == null) {
             return;

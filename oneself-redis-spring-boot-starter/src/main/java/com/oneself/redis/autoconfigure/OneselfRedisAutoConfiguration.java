@@ -37,12 +37,18 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 
 import com.oneself.redis.core.RedisOps;
 
+/**
+ * Redis Starter 自动装配。
+ */
 @AutoConfiguration
 @EnableConfigurationProperties(OneselfRedisProperties.class)
 @ConditionalOnClass(RedisConnectionFactory.class)
 @ConditionalOnProperty(prefix = "oneself.redis", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class OneselfRedisAutoConfiguration {
 
+    /**
+     * 默认 RedisTemplate，提供 JSON Value 与 String Key 序列化。
+     */
     @Bean
     @ConditionalOnMissingBean(name = "oneselfRedisTemplate")
     public RedisTemplate<String, Object> oneselfRedisTemplate(RedisConnectionFactory connectionFactory) {
@@ -57,6 +63,9 @@ public class OneselfRedisAutoConfiguration {
         return template;
     }
 
+    /**
+     * 根据 mode 构建 RedisConnectionFactory，支持单机/集群/哨兵。
+     */
     @Bean
     @ConditionalOnMissingBean(RedisConnectionFactory.class)
     public RedisConnectionFactory redisConnectionFactory(OneselfRedisProperties properties) {
@@ -113,6 +122,9 @@ public class OneselfRedisAutoConfiguration {
         return new LettuceConnectionFactory(standalone, clientConfiguration);
     }
 
+    /**
+     * 解析节点配置（host:port）。
+     */
     private RedisNode parseRedisNode(String node) {
         if (node == null || node.isBlank()) {
             return null;
@@ -126,6 +138,9 @@ public class OneselfRedisAutoConfiguration {
         return new RedisNode(host, port);
     }
 
+    /**
+     * 构建 Lettuce 客户端配置（SSL、超时、连接池等）。
+     */
     private LettuceClientConfiguration buildClientConfiguration(OneselfRedisProperties properties) {
         LettuceClientConfiguration.LettuceClientConfigurationBuilder builder;
         if (properties.isPoolEnabled()) {
@@ -161,10 +176,16 @@ public class OneselfRedisAutoConfiguration {
         return builder.build();
     }
 
+    /**
+     * 字符串判空。
+     */
     private boolean hasText(String value) {
         return value != null && !value.isBlank();
     }
 
+    /**
+     * 解析 ReadFrom 配置。
+     */
     private ReadFrom parseReadFrom(String value) {
         if (!hasText(value)) {
             return null;
@@ -186,6 +207,9 @@ public class OneselfRedisAutoConfiguration {
         }
     }
 
+    /**
+     * 解析断连策略。
+     */
     private ClientOptions.DisconnectedBehavior parseDisconnectedBehavior(String value) {
         if (!hasText(value)) {
             return ClientOptions.DisconnectedBehavior.DEFAULT;
@@ -203,6 +227,9 @@ public class OneselfRedisAutoConfiguration {
         }
     }
 
+    /**
+     * 构建 SSL 配置。
+     */
     private SslOptions buildSslOptions(OneselfRedisProperties properties) {
         if (!properties.isSslEnabled()) {
             return null;
@@ -222,6 +249,9 @@ public class OneselfRedisAutoConfiguration {
         return ssl.build();
     }
 
+    /**
+     * 转为 char[]。
+     */
     private char[] toCharArray(String value) {
         if (!hasText(value)) {
             return null;
@@ -229,6 +259,9 @@ public class OneselfRedisAutoConfiguration {
         return value.toCharArray();
     }
 
+    /**
+     * 业务侧 Redis 操作封装。
+     */
     @Bean
     @ConditionalOnMissingBean
     public RedisOps redisOps(@Qualifier("oneselfRedisTemplate") RedisTemplate<String, Object> redisTemplate,
@@ -237,6 +270,9 @@ public class OneselfRedisAutoConfiguration {
         return new RedisOps(redisTemplate, properties, meterRegistry.getIfAvailable());
     }
 
+    /**
+     * Spring Cache 集成，使用 RedisCacheManager。
+     */
     @Bean
     @ConditionalOnMissingBean(CacheManager.class)
     @ConditionalOnProperty(prefix = "oneself.redis", name = "cache-enabled", havingValue = "true")
