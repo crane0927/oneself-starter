@@ -38,6 +38,10 @@ logging:
 oneself:
   logs:
     json-enabled: false
+    encrypt-key: ""
+    mask-patterns: ["(?i)token\\s*[:=]\\s*[^\\s,;]+", "\\\\b\\\\d{18}\\\\b"]
+    mask-fields: ["password", "idCard", "mobile"]
+    mask-fields-key: ""
     access-enabled: true
     access-slow-threshold-ms: 1000
     access-logger-name: "ACCESS"
@@ -50,6 +54,10 @@ oneself:
 | `logging.file.path` | string | `./logs` | 日志目录。 |
 | `logging.level.root` | string | `INFO` | 根日志级别。 |
 | `oneself.logs.json-enabled` | boolean | `false` | 是否启用 JSON 日志文件输出。 |
+| `oneself.logs.encrypt-key` | string | `""` | 日志加密默认密钥。 |
+| `oneself.logs.mask-patterns` | list | `[]` | 自定义脱敏正则（命中后替换为 ***）。 |
+| `oneself.logs.mask-fields` | list | `[]` | 固定脱敏字段名（Map/JSON）。 |
+| `oneself.logs.mask-fields-key` | string | `""` | 固定脱敏字段密钥（默认 ENCRYPT）。 |
 | `oneself.logs.access-enabled` | boolean | `true` | 是否启用访问日志。 |
 | `oneself.logs.access-slow-threshold-ms` | long | `1000` | 慢请求阈值（毫秒）。 |
 | `oneself.logs.access-logger-name` | string | `ACCESS` | 访问日志 logger 名称。 |
@@ -87,6 +95,23 @@ oneself:
 无额外代码改动，Starter 会提供默认 `logback-spring.xml`。
 若应用侧需要自定义格式或追加 appender，可在业务工程中覆盖 `logback-spring.xml`。
 
+### 字段加密注解
+在需要脱敏/加密的字段上标注 `@LogEncrypt`：
+```java
+import com.oneself.logs.core.LogEncrypt;
+
+public class LoginRequest {
+    @LogEncrypt(mode = LogEncrypt.Mode.MASK)
+    private String password;
+
+    @LogEncrypt(mode = LogEncrypt.Mode.ENCRYPT, key = "your-key", name = "idCard")
+    private String idCard;
+}
+```
+未指定 key 时使用 `oneself.logs.encrypt-key` 作为默认密钥。
+支持两种模式：`MASK`（直接替换为 ***）与 `ENCRYPT`（密钥加密）。
+Map/JSON 字段会根据 `@LogEncrypt.name`（或字段名）以及 `oneself.logs.mask-fields` 进行脱敏/加密。
+
 ## 注意事项
 - 默认日志文件位于 `${logging.file.path}/${spring.application.name}.log`。
 - JSON 日志文件位于 `${logging.file.path}/${spring.application.name}.json.log`（启用后）。
@@ -95,6 +120,7 @@ oneself:
 - 日志默认异步写入，队列满时丢弃低优先级日志以保护主流程。
 - TraceId/SpanId 从 MDC 读取，使用 Micrometer Tracing 时自动生效。
 - JSON 日志同样应用脱敏规则。
+- 带 `@LogEncrypt` 的字段会按配置进行掩码或密钥加密。
 
 ## 企业级增强点（建议）
 - 与 ELK/EFK 打通，统一采集与检索。

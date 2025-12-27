@@ -6,11 +6,15 @@
     <springProperty scope="context" name="LOG_PATH" source="logging.file.path" defaultValue="./logs"/>
     <springProperty scope="context" name="LOG_LEVEL" source="logging.level.root" defaultValue="INFO"/>
     <springProperty scope="context" name="LOG_JSON" source="oneself.logs.json-enabled" defaultValue="false"/>
+    <springProperty scope="context" name="LOG_ENCRYPT_KEY" source="oneself.logs.encrypt-key" defaultValue=""/>
+    <springProperty scope="context" name="LOG_MASK_PATTERNS" source="oneself.logs.mask-patterns" defaultValue=""/>
+    <springProperty scope="context" name="LOG_MASK_FIELDS" source="oneself.logs.mask-fields" defaultValue=""/>
+    <springProperty scope="context" name="LOG_MASK_FIELDS_KEY" source="oneself.logs.mask-fields-key" defaultValue=""/>
 
     <conversionRule conversionWord="mask" converterClass="com.oneself.logs.core.MaskingConverter"/>
 
     <property name="CONSOLE_PATTERN"
-              value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr([%thread]){faint} %clr(%-5level) %clr(%logger{36}){cyan} - %mask(%msg)%n%ex"/>
+              value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr([%thread]){faint} %clr(%-5level) %clr(%logger{36}){cyan} traceId=%X{traceId:-} spanId=%X{spanId:-} - %mask(%msg)%n%ex"/>
     <property name="FILE_PATTERN"
               value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} traceId=%X{traceId:-} spanId=%X{spanId:-} - %mask(%msg)%n%ex"/>
     <property name="ACCESS_PATTERN"
