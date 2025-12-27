@@ -2,11 +2,11 @@ package com.oneself.elasticsearch.autoconfigure;
 
 import java.net.URI;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
@@ -42,16 +42,17 @@ public class OneselfElasticsearchAutoConfiguration {
         HttpHost[] hosts = Arrays.stream(properties.getUris())
                 .map(URI::create)
                 .map(uri -> new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme()))
-                .collect(Collectors.toList())
+                .toList()
                 .toArray(new HttpHost[0]);
         RestClientBuilder builder = RestClient.builder(hosts)
                 .setRequestConfigCallback(requestConfigBuilder -> requestConfigBuilder
                         .setConnectTimeout((int) properties.getConnectTimeout().toMillis())
                         .setSocketTimeout((int) properties.getSocketTimeout().toMillis()));
         if (hasText(properties.getUsername()) && hasText(properties.getPassword())) {
-            BasicCredentialsProvider provider = new BasicCredentialsProvider();
+            CredentialsProvider provider = new BasicCredentialsProvider();
             provider.setCredentials(AuthScope.ANY,
-                    new UsernamePasswordCredentials(properties.getUsername(), properties.getPassword()));
+                    new UsernamePasswordCredentials(properties.getUsername(),
+                            properties.getPassword()));
             builder.setHttpClientConfigCallback(httpClientBuilder ->
                     httpClientBuilder.setDefaultCredentialsProvider(provider));
         }
