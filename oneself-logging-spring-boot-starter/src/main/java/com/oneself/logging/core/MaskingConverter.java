@@ -219,6 +219,9 @@ public class MaskingConverter extends CompositeConverter<ILoggingEvent> {
 
     private List<FieldRule> collectRules(Object[] args) {
         List<FieldRule> rules = new ArrayList<>();
+        if (args == null || args.length == 0) {
+            return rules;
+        }
         for (Object arg : args) {
             if (arg == null || arg instanceof CharSequence || arg instanceof Number
                     || arg instanceof Boolean || arg instanceof Enum || arg instanceof Map<?, ?>) {
