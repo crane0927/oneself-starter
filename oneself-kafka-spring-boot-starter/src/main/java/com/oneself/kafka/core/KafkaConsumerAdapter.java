@@ -8,8 +8,6 @@ import java.util.Optional;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-import com.oneself.kafka.core.KafkaHeaderNames;
-
 
 /**
  * 消费者通用适配器，将原始 ConsumerRecord 统一封装。
@@ -27,18 +25,18 @@ public class KafkaConsumerAdapter {
         if (envelope == null) {
             return new KafkaMessage<>(record.topic(), record.key(), null, headers, timestamp);
         }
-        Map<String, String> mergedHeaders = mergeHeaders(headers, envelope.getHeaders());
-        if (!mergedHeaders.containsKey(KafkaHeaderNames.EVENT_ID) && envelope.getId() != null) {
-            mergedHeaders.put(KafkaHeaderNames.EVENT_ID, envelope.getId());
+        Map<String, String> mergedHeaders = mergeHeaders(headers, envelope.headers());
+        if (!mergedHeaders.containsKey(KafkaHeaderNames.EVENT_ID) && envelope.id() != null) {
+            mergedHeaders.put(KafkaHeaderNames.EVENT_ID, envelope.id());
         }
-        if (!mergedHeaders.containsKey(KafkaHeaderNames.TRACE_ID) && envelope.getTraceId() != null) {
-            mergedHeaders.put(KafkaHeaderNames.TRACE_ID, envelope.getTraceId());
+        if (!mergedHeaders.containsKey(KafkaHeaderNames.TRACE_ID) && envelope.traceId() != null) {
+            mergedHeaders.put(KafkaHeaderNames.TRACE_ID, envelope.traceId());
         }
         return new KafkaMessage<>(record.topic(),
-                Optional.ofNullable(record.key()).orElse(envelope.getId()),
-                envelope.getPayload(),
+                Optional.ofNullable(record.key()).orElse(envelope.id()),
+                envelope.payload(),
                 mergedHeaders,
-                envelope.getTimestamp() == null ? timestamp : envelope.getTimestamp());
+                envelope.timestamp() == null ? timestamp : envelope.timestamp());
     }
 
     /**
