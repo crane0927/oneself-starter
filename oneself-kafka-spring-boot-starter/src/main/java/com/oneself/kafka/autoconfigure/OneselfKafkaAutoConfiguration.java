@@ -13,10 +13,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.CommonClientConfigs;
+import org.apache.kafka.common.config.SaslConfigs;
+import org.apache.kafka.common.config.SslConfigs;
 import java.util.Map;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -61,6 +65,7 @@ public class OneselfKafkaAutoConfiguration {
     public ProducerFactory<String, Object> kafkaProducerFactory(KafkaProperties kafkaProperties,
                                                                 OneselfKafkaProperties properties) {
         Map<String, Object> configs = kafkaProperties.buildProducerProperties();
+        applyConnectionSettings(configs, properties);
         configs.putIfAbsent(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
         configs.putIfAbsent(ProducerConfig.ACKS_CONFIG, properties.getProducerAcks());
         configs.putIfAbsent(ProducerConfig.RETRIES_CONFIG, Integer.MAX_VALUE);
@@ -87,6 +92,7 @@ public class OneselfKafkaAutoConfiguration {
     public ProducerFactory<String, Object> kafkaProducerFactoryNonIdempotent(KafkaProperties kafkaProperties,
                                                                              OneselfKafkaProperties properties) {
         Map<String, Object> configs = kafkaProperties.buildProducerProperties();
+        applyConnectionSettings(configs, properties);
         configs.putIfAbsent(ProducerConfig.ACKS_CONFIG, properties.getProducerAcks());
         configs.putIfAbsent(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG,
                 (int) properties.getProducerDeliveryTimeout().toMillis());
@@ -110,6 +116,7 @@ public class OneselfKafkaAutoConfiguration {
     public ConsumerFactory<Object, Object> kafkaConsumerFactory(KafkaProperties kafkaProperties,
                                                                 OneselfKafkaProperties properties) {
         Map<String, Object> configs = kafkaProperties.buildConsumerProperties();
+        applyConnectionSettings(configs, properties);
         configs.putIfAbsent(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, properties.isConsumerEnableAutoCommit());
         configs.putIfAbsent(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, properties.getConsumerAutoOffsetReset());
         configs.putIfAbsent(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, properties.getConsumerMaxPollRecords());
@@ -230,6 +237,36 @@ public class OneselfKafkaAutoConfiguration {
         }
         String normalized = value.trim().toUpperCase();
         return ContainerProperties.AckMode.valueOf(normalized);
+    }
+
+    /**
+     * 应用统一连接参数。
+     */
+    private void applyConnectionSettings(Map<String, Object> configs, OneselfKafkaProperties properties) {
+        if (properties.getBootstrapServers() != null && !properties.getBootstrapServers().isBlank()) {
+            configs.putIfAbsent(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, properties.getBootstrapServers());
+        }
+        if (properties.getSecurityProtocol() != null && !properties.getSecurityProtocol().isBlank()) {
+            configs.putIfAbsent(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, properties.getSecurityProtocol());
+        }
+        if (properties.getSaslMechanism() != null && !properties.getSaslMechanism().isBlank()) {
+            configs.putIfAbsent(SaslConfigs.SASL_MECHANISM, properties.getSaslMechanism());
+        }
+        if (properties.getSaslJaasConfig() != null && !properties.getSaslJaasConfig().isBlank()) {
+            configs.putIfAbsent(SaslConfigs.SASL_JAAS_CONFIG, properties.getSaslJaasConfig());
+        }
+        if (properties.getSslTruststoreLocation() != null && !properties.getSslTruststoreLocation().isBlank()) {
+            configs.putIfAbsent(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, properties.getSslTruststoreLocation());
+        }
+        if (properties.getSslTruststorePassword() != null && !properties.getSslTruststorePassword().isBlank()) {
+            configs.putIfAbsent(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, properties.getSslTruststorePassword());
+        }
+        if (properties.getSslKeystoreLocation() != null && !properties.getSslKeystoreLocation().isBlank()) {
+            configs.putIfAbsent(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG, properties.getSslKeystoreLocation());
+        }
+        if (properties.getSslKeystorePassword() != null && !properties.getSslKeystorePassword().isBlank()) {
+            configs.putIfAbsent(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, properties.getSslKeystorePassword());
+        }
     }
 
     private Class<?> loadClass(String className) {

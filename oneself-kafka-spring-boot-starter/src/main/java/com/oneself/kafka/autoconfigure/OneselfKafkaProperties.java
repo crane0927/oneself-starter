@@ -19,6 +19,46 @@ public class OneselfKafkaProperties {
     private String defaultTopic;
 
     /**
+     * Kafka 集群地址（bootstrap.servers）。
+     */
+    private String bootstrapServers;
+
+    /**
+     * 安全协议（security.protocol）。
+     */
+    private String securityProtocol;
+
+    /**
+     * SASL 机制（sasl.mechanism）。
+     */
+    private String saslMechanism;
+
+    /**
+     * SASL JAAS 配置（sasl.jaas.config）。
+     */
+    private String saslJaasConfig;
+
+    /**
+     * SSL truststore 路径。
+     */
+    private String sslTruststoreLocation;
+
+    /**
+     * SSL truststore 密码。
+     */
+    private String sslTruststorePassword;
+
+    /**
+     * SSL keystore 路径。
+     */
+    private String sslKeystoreLocation;
+
+    /**
+     * SSL keystore 密码。
+     */
+    private String sslKeystorePassword;
+
+    /**
      * 事件 schema 版本。
      */
     private String schemaVersion = "v1";
@@ -224,6 +264,118 @@ public class OneselfKafkaProperties {
      */
     public void setDefaultTopic(String defaultTopic) {
         this.defaultTopic = defaultTopic;
+    }
+
+    /**
+     * 获取BootstrapServers。
+     */
+    public String getBootstrapServers() {
+        return bootstrapServers;
+    }
+
+    /**
+     * 设置BootstrapServers。
+     */
+    public void setBootstrapServers(String bootstrapServers) {
+        this.bootstrapServers = bootstrapServers;
+    }
+
+    /**
+     * 获取SecurityProtocol。
+     */
+    public String getSecurityProtocol() {
+        return securityProtocol;
+    }
+
+    /**
+     * 设置SecurityProtocol。
+     */
+    public void setSecurityProtocol(String securityProtocol) {
+        this.securityProtocol = securityProtocol;
+    }
+
+    /**
+     * 获取SaslMechanism。
+     */
+    public String getSaslMechanism() {
+        return saslMechanism;
+    }
+
+    /**
+     * 设置SaslMechanism。
+     */
+    public void setSaslMechanism(String saslMechanism) {
+        this.saslMechanism = saslMechanism;
+    }
+
+    /**
+     * 获取SaslJaasConfig。
+     */
+    public String getSaslJaasConfig() {
+        return saslJaasConfig;
+    }
+
+    /**
+     * 设置SaslJaasConfig。
+     */
+    public void setSaslJaasConfig(String saslJaasConfig) {
+        this.saslJaasConfig = saslJaasConfig;
+    }
+
+    /**
+     * 获取SslTruststoreLocation。
+     */
+    public String getSslTruststoreLocation() {
+        return sslTruststoreLocation;
+    }
+
+    /**
+     * 设置SslTruststoreLocation。
+     */
+    public void setSslTruststoreLocation(String sslTruststoreLocation) {
+        this.sslTruststoreLocation = sslTruststoreLocation;
+    }
+
+    /**
+     * 获取SslTruststorePassword。
+     */
+    public String getSslTruststorePassword() {
+        return sslTruststorePassword;
+    }
+
+    /**
+     * 设置SslTruststorePassword。
+     */
+    public void setSslTruststorePassword(String sslTruststorePassword) {
+        this.sslTruststorePassword = sslTruststorePassword;
+    }
+
+    /**
+     * 获取SslKeystoreLocation。
+     */
+    public String getSslKeystoreLocation() {
+        return sslKeystoreLocation;
+    }
+
+    /**
+     * 设置SslKeystoreLocation。
+     */
+    public void setSslKeystoreLocation(String sslKeystoreLocation) {
+        this.sslKeystoreLocation = sslKeystoreLocation;
+    }
+
+    /**
+     * 获取SslKeystorePassword。
+     */
+    public String getSslKeystorePassword() {
+        return sslKeystorePassword;
+    }
+
+    /**
+     * 设置SslKeystorePassword。
+     */
+    public void setSslKeystorePassword(String sslKeystorePassword) {
+        this.sslKeystorePassword = sslKeystorePassword;
     }
 
     /**

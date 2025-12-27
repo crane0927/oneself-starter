@@ -29,6 +29,14 @@ oneself:
     consumer-enabled: true
     idempotence-enabled: true
     default-topic: "order.events"
+    bootstrap-servers: "127.0.0.1:9092"
+    security-protocol: "PLAINTEXT"
+    sasl-mechanism: ""
+    sasl-jaas-config: ""
+    ssl-truststore-location: ""
+    ssl-truststore-password: ""
+    ssl-keystore-location: ""
+    ssl-keystore-password: ""
     schema-version: "v1"
     ordered-topics: ["order.events"]
     unordered-key-strategy: "NONE"
@@ -180,7 +188,7 @@ kafka_idempotent_record
 Starter 提供 `KafkaOutboxEvent` 与 `KafkaOutboxPublisher` 接口，业务侧可基于本地事务落库并异步发布。
 
 ## 注意事项
-- 该 Starter 仅统一基础生产/消费逻辑，连接参数请使用 Spring Boot Kafka 原生配置。
+- 该 Starter 仅统一基础生产/消费逻辑；连接参数可用 `oneself.kafka.*` 配置，也可继续使用 Spring Boot Kafka 原生配置。
 - 幂等生产者默认开启（可通过 `oneself.kafka.idempotence-enabled=false` 关闭）。
 - Envelope 以 JSON 发送，建议配置 `spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer`。
 - 消费侧建议使用 `JsonDeserializer` 并配置 `spring.kafka.consumer.properties.spring.json.trusted.packages`。
