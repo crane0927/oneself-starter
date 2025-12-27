@@ -28,7 +28,6 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactoryConfigurer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.listener.CommonErrorHandler;
 import org.springframework.util.backoff.FixedBackOff;
@@ -170,13 +169,12 @@ public class OneselfKafkaAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = "kafkaListenerContainerFactory")
     public ConcurrentKafkaListenerContainerFactory<Object, Object> kafkaListenerContainerFactory(
-            ConcurrentKafkaListenerContainerFactoryConfigurer configurer,
             ConsumerFactory<Object, Object> consumerFactory,
             CommonErrorHandler errorHandler,
             OneselfKafkaProperties properties) {
         ConcurrentKafkaListenerContainerFactory<Object, Object> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        configurer.configure(factory, consumerFactory);
+        factory.setConsumerFactory(consumerFactory);
         factory.setCommonErrorHandler(errorHandler);
         factory.getContainerProperties().setAckMode(parseAckMode(properties.getListenerAckMode()));
         if (properties.getListenerConcurrency() != null) {
