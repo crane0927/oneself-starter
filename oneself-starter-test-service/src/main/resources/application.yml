@@ -1,0 +1,50 @@
+server:
+  port: 18080
+
+
+spring:
+  application:
+    name: oneself-starter-test-service
+  profiles:
+    active: dev # 设置为开发环境
+
+#  kafka:
+#    producer:
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+#    consumer:
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+#      properties:
+#        spring.json.trusted.packages: "com.oneself.kafka.core,com.oneself.testservice.kafka"
+
+logging:
+  file:
+    path: ./logs
+  level:
+    root: INFO
+
+oneself:
+  logging:
+#    json-enabled: false
+    encrypt-key: "test-key"
+    mask-fields: ["password", "idCard"]
+  redis:
+    enabled: true
+    host: 127.0.0.1
+    port: 6379
+    password: mBYFyN4wXi6WsA
+    key-prefix: test
+#  kafka:
+#    enabled: true
+#    producer-enabled: true
+#    consumer-enabled: true
+#    default-topic: "oneself.test.events"
+#    ordered-topics: ["oneself.test.events"]
+#    bootstrap-servers: "127.0.0.1:9092"
+#    consumer-group-id: "oneself-test-service"
+  elasticsearch:
+    enabled: true
+    uris: "127.0.0.1:9200"
+    index-prefix: "test"
+    compatibility-mode: true
