@@ -21,6 +21,7 @@
     <modules>
         <module>oneself-redis-spring-boot-starter</module>
         <module>oneself-kafka-spring-boot-starter</module>
+        <module>oneself-logs-spring-boot-starter</module>
     </modules>
 
     <build>
