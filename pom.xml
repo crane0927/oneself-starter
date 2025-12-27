@@ -17,11 +17,12 @@
 
     <properties>
         <java.version>21</java.version>
+        <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
     </properties>
     <modules>
         <module>oneself-redis-spring-boot-starter</module>
         <module>oneself-kafka-spring-boot-starter</module>
-        <module>oneself-logs-spring-boot-starter</module>
+        <module>oneself-logging-spring-boot-starter</module>
     </modules>
 
     <build>

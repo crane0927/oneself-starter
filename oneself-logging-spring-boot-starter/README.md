@@ -1,4 +1,4 @@
-# Oneself Logs Spring Boot Starter
+# Oneself Logging Spring Boot Starter
 
 ## 模块说明
 基于 Logback 的企业级日志 Starter，提供统一日志配置与最佳实践，包含：
@@ -18,7 +18,7 @@
 ```xml
 <dependency>
   <groupId>com.oneself</groupId>
-  <artifactId>oneself-logs-spring-boot-starter</artifactId>
+  <artifactId>oneself-logging-spring-boot-starter</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 </dependency>
 ```
@@ -36,7 +36,7 @@ logging:
   level:
     root: INFO
 oneself:
-  logs:
+  logging:
     json-enabled: false
     encrypt-key: ""
     mask-patterns: ["(?i)token\\s*[:=]\\s*[^\\s,;]+", "\\\\b\\\\d{18}\\\\b"]
@@ -53,14 +53,14 @@ oneself:
 | `spring.application.name` | string | `application` | 应用名称，用于日志文件名。 |
 | `logging.file.path` | string | `./logs` | 日志目录。 |
 | `logging.level.root` | string | `INFO` | 根日志级别。 |
-| `oneself.logs.json-enabled` | boolean | `false` | 是否启用 JSON 日志文件输出。 |
-| `oneself.logs.encrypt-key` | string | `""` | 日志加密默认密钥。 |
-| `oneself.logs.mask-patterns` | list | `[]` | 自定义脱敏正则（命中后替换为 ***）。 |
-| `oneself.logs.mask-fields` | list | `[]` | 固定脱敏字段名（Map/JSON）。 |
-| `oneself.logs.mask-fields-key` | string | `""` | 固定脱敏字段密钥（默认 ENCRYPT）。 |
-| `oneself.logs.access-enabled` | boolean | `true` | 是否启用访问日志。 |
-| `oneself.logs.access-slow-threshold-ms` | long | `1000` | 慢请求阈值（毫秒）。 |
-| `oneself.logs.access-logger-name` | string | `ACCESS` | 访问日志 logger 名称。 |
+| `oneself.logging.json-enabled` | boolean | `false` | 是否启用 JSON 日志文件输出。 |
+| `oneself.logging.encrypt-key` | string | `""` | 日志加密默认密钥。 |
+| `oneself.logging.mask-patterns` | list | `[]` | 自定义脱敏正则（命中后替换为 ***）。 |
+| `oneself.logging.mask-fields` | list | `[]` | 固定脱敏字段名（Map/JSON）。 |
+| `oneself.logging.mask-fields-key` | string | `""` | 固定脱敏字段密钥（默认 ENCRYPT）。 |
+| `oneself.logging.access-enabled` | boolean | `true` | 是否启用访问日志。 |
+| `oneself.logging.access-slow-threshold-ms` | long | `1000` | 慢请求阈值（毫秒）。 |
+| `oneself.logging.access-logger-name` | string | `ACCESS` | 访问日志 logger 名称。 |
 
 ## 常见组合示例
 
@@ -87,7 +87,7 @@ logging:
   level:
     root: INFO
 oneself:
-  logs:
+  logging:
     json-enabled: true
 ```
 
@@ -97,8 +97,9 @@ oneself:
 
 ### 字段加密注解
 在需要脱敏/加密的字段上标注 `@LogEncrypt`：
+
 ```java
-import com.oneself.logs.core.LogEncrypt;
+import com.oneself.logging.core.LogEncrypt;
 
 public class LoginRequest {
     @LogEncrypt(mode = LogEncrypt.Mode.MASK)
@@ -108,9 +109,9 @@ public class LoginRequest {
     private String idCard;
 }
 ```
-未指定 key 时使用 `oneself.logs.encrypt-key` 作为默认密钥。
+未指定 key 时使用 `oneself.logging.encrypt-key` 作为默认密钥。
 支持两种模式：`MASK`（直接替换为 ***）与 `ENCRYPT`（密钥加密）。
-Map/JSON 字段会根据 `@LogEncrypt.name`（或字段名）以及 `oneself.logs.mask-fields` 进行脱敏/加密。
+Map/JSON 字段会根据 `@LogEncrypt.name`（或字段名）以及 `oneself.logging.mask-fields` 进行脱敏/加密。
 
 ## 注意事项
 - 默认日志文件位于 `${logging.file.path}/${spring.application.name}.log`。

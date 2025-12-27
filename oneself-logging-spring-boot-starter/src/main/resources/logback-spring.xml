@@ -5,13 +5,13 @@
     <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="application"/>
     <springProperty scope="context" name="LOG_PATH" source="logging.file.path" defaultValue="./logs"/>
     <springProperty scope="context" name="LOG_LEVEL" source="logging.level.root" defaultValue="INFO"/>
-    <springProperty scope="context" name="LOG_JSON" source="oneself.logs.json-enabled" defaultValue="false"/>
-    <springProperty scope="context" name="LOG_ENCRYPT_KEY" source="oneself.logs.encrypt-key" defaultValue=""/>
-    <springProperty scope="context" name="LOG_MASK_PATTERNS" source="oneself.logs.mask-patterns" defaultValue=""/>
-    <springProperty scope="context" name="LOG_MASK_FIELDS" source="oneself.logs.mask-fields" defaultValue=""/>
-    <springProperty scope="context" name="LOG_MASK_FIELDS_KEY" source="oneself.logs.mask-fields-key" defaultValue=""/>
+    <springProperty scope="context" name="LOG_JSON" source="oneself.logging.json-enabled" defaultValue="false"/>
+    <springProperty scope="context" name="LOG_ENCRYPT_KEY" source="oneself.logging.encrypt-key" defaultValue=""/>
+    <springProperty scope="context" name="LOG_MASK_PATTERNS" source="oneself.logging.mask-patterns" defaultValue=""/>
+    <springProperty scope="context" name="LOG_MASK_FIELDS" source="oneself.logging.mask-fields" defaultValue=""/>
+    <springProperty scope="context" name="LOG_MASK_FIELDS_KEY" source="oneself.logging.mask-fields-key" defaultValue=""/>
 
-    <conversionRule conversionWord="mask" converterClass="com.oneself.logs.core.MaskingConverter"/>
+    <conversionRule conversionWord="mask" converterClass="com.oneself.logging.core.MaskingConverter"/>
 
     <property name="CONSOLE_PATTERN"
               value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr([%thread]){faint} %clr(%-5level) %clr(%logger{36}){cyan} traceId=%X{traceId:-} spanId=%X{spanId:-} - %mask(%msg)%n%ex"/>
