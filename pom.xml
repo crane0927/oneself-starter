@@ -25,6 +25,7 @@
         <module>oneself-kafka-spring-boot-starter</module>
         <module>oneself-logging-spring-boot-starter</module>
         <module>oneself-elasticsearch-spring-boot-starter</module>
+        <module>oneself-starter-test-service</module>
     </modules>
 
     <dependencies>

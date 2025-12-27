@@ -11,7 +11,7 @@
     <springProperty scope="context" name="LOG_MASK_FIELDS" source="oneself.logging.mask-fields" defaultValue=""/>
     <springProperty scope="context" name="LOG_MASK_FIELDS_KEY" source="oneself.logging.mask-fields-key" defaultValue=""/>
 
-    <conversionRule conversionWord="mask" converterClass="com.oneself.logging.core.MaskingConverter"/>
+    <conversionRule conversionWord="mask" class="com.oneself.logging.core.MaskingConverter"/>
 
     <property name="CONSOLE_PATTERN"
               value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr([%thread]){faint} %clr(%-5level) %clr(%logger{36}){cyan} traceId=%X{traceId:-} spanId=%X{spanId:-} - %mask(%msg)%n%ex"/>
@@ -35,6 +35,10 @@
 
     <appender name="FILE_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/${APP_NAME}.json.log</file>
+        <filter class="com.oneself.logging.core.PropertyToggleFilter">
+            <propertyName>LOG_JSON</propertyName>
+            <expectedValue>true</expectedValue>
+        </filter>
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>
                 <timestamp/>
@@ -125,11 +129,7 @@
         <root level="${LOG_LEVEL}">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="ASYNC_FILE"/>
-            <if condition='property("LOG_JSON").equalsIgnoreCase("true")'>
-                <then>
-                    <appender-ref ref="ASYNC_JSON"/>
-                </then>
-            </if>
+            <appender-ref ref="ASYNC_JSON"/>
             <appender-ref ref="ASYNC_ERROR"/>
         </root>
     </springProfile>
@@ -137,11 +137,7 @@
     <springProfile name="!dev">
         <root level="${LOG_LEVEL}">
             <appender-ref ref="ASYNC_FILE"/>
-            <if condition='property("LOG_JSON").equalsIgnoreCase("true")'>
-                <then>
-                    <appender-ref ref="ASYNC_JSON"/>
-                </then>
-            </if>
+            <appender-ref ref="ASYNC_JSON"/>
             <appender-ref ref="ASYNC_ERROR"/>
         </root>
     </springProfile>

@@ -14,13 +14,13 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.slf4j.helpers.MessageFormatter;
 
-import ch.qos.logback.classic.pattern.ClassicConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.pattern.CompositeConverter;
 
 /**
  * 日志脱敏与加密转换器。
  */
-public class MaskingConverter extends ClassicConverter {
+public class MaskingConverter extends CompositeConverter<ILoggingEvent> {
 
     private static final Pattern[] KEY_VALUE_PATTERNS = new Pattern[] {
             Pattern.compile("(?i)(password|passwd|pwd)\\s*[:=]\\s*([^\\s,;]+)"),
@@ -38,22 +38,37 @@ public class MaskingConverter extends ClassicConverter {
     private volatile List<String> cachedMaskFields = new ArrayList<>();
 
     @Override
-    public String convert(ILoggingEvent event) {
-        Object[] args = event.getArgumentArray();
+    protected String transform(ILoggingEvent event, String in) {
         String message;
-        if (args == null || args.length == 0) {
-            message = event.getFormattedMessage();
+        if (event == null) {
+            message = in;
+        } else if (in == null || in.equals(event.getFormattedMessage())) {
+            message = buildMaskedMessage(event);
         } else {
-            String defaultKey = resolveDefaultKey();
-            Object[] sanitizedArgs = new Object[args.length];
-            List<FieldRule> rules = collectRules(args);
-            List<String> fixedFields = getMaskFields();
-            for (int i = 0; i < args.length; i++) {
-                sanitizedArgs[i] = sanitizeArgument(args[i], defaultKey, rules, fixedFields);
-            }
-            message = MessageFormatter.arrayFormat(event.getMessage(), sanitizedArgs).getMessage();
+            message = in;
         }
-        return maskRegex(message);
+        if (message == null) {
+            return null;
+        }
+        List<FieldRule> rules = event == null ? Collections.emptyList() : collectRules(event.getArgumentArray());
+        List<String> fixedFields = getMaskFields();
+        String defaultKey = resolveDefaultKey();
+        return maskRegex(maskJsonString(message, rules, fixedFields, defaultKey));
+    }
+
+    private String buildMaskedMessage(ILoggingEvent event) {
+        Object[] args = event.getArgumentArray();
+        if (args == null || args.length == 0) {
+            return event.getFormattedMessage();
+        }
+        String defaultKey = resolveDefaultKey();
+        Object[] sanitizedArgs = new Object[args.length];
+        List<FieldRule> rules = collectRules(args);
+        List<String> fixedFields = getMaskFields();
+        for (int i = 0; i < args.length; i++) {
+            sanitizedArgs[i] = sanitizeArgument(args[i], defaultKey, rules, fixedFields);
+        }
+        return MessageFormatter.arrayFormat(event.getMessage(), sanitizedArgs).getMessage();
     }
 
     private String resolveDefaultKey() {
