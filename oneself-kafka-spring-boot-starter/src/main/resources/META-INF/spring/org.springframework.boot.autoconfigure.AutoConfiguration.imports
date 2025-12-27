@@ -1,1 +1,2 @@
 com.oneself.kafka.autoconfigure.OneselfKafkaAutoConfiguration
+com.oneself.kafka.autoconfigure.OneselfKafkaJdbcAutoConfiguration

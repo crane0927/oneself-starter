@@ -1,10 +1,7 @@
 package com.oneself.kafka.autoconfigure;
 
-import com.oneself.kafka.core.DbKafkaIdempotentExecutor;
-import com.oneself.kafka.core.JdbcKafkaIdempotentRepository;
 import com.oneself.kafka.core.KafkaConsumerAdapter;
 import com.oneself.kafka.core.KafkaIdempotentExecutor;
-import com.oneself.kafka.core.KafkaIdempotentRepository;
 import com.oneself.kafka.core.KafkaOps;
 import com.oneself.kafka.core.KafkaRetryRecoverer;
 import com.oneself.kafka.core.RedisKafkaIdempotentExecutor;
@@ -34,7 +31,6 @@ import org.springframework.util.backoff.FixedBackOff;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.ConsumerRecordRecoverer;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * Kafka Starter 自动装配。
@@ -202,31 +198,6 @@ public class OneselfKafkaAutoConfiguration {
     public KafkaIdempotentExecutor redisKafkaIdempotentExecutor(StringRedisTemplate redisTemplate,
                                                                 OneselfKafkaProperties properties) {
         return new RedisKafkaIdempotentExecutor(redisTemplate, properties);
-    }
-
-    /**
-     * DB 幂等仓储。
-     */
-    @Bean
-    @ConditionalOnClass(JdbcTemplate.class)
-    @ConditionalOnMissingBean(KafkaIdempotentRepository.class)
-    @ConditionalOnProperty(prefix = "oneself.kafka", name = "idempotent-store", havingValue = "DB")
-    public KafkaIdempotentRepository jdbcKafkaIdempotentRepository(JdbcTemplate jdbcTemplate,
-                                                                    OneselfKafkaProperties properties) {
-        return new JdbcKafkaIdempotentRepository(jdbcTemplate, properties.getIdempotentTableName());
-    }
-
-    /**
-     * DB 幂等执行器。
-     */
-    @Bean
-    @ConditionalOnClass(JdbcTemplate.class)
-    @ConditionalOnMissingBean(KafkaIdempotentExecutor.class)
-    @ConditionalOnProperty(prefix = "oneself.kafka", name = "idempotent-store", havingValue = "DB")
-    public KafkaIdempotentExecutor dbKafkaIdempotentExecutor(KafkaIdempotentRepository repository,
-                                                             OneselfKafkaProperties properties) {
-        String groupId = properties.getConsumerGroupId() == null ? "unknown" : properties.getConsumerGroupId();
-        return new DbKafkaIdempotentExecutor(repository, groupId);
     }
 
     private ContainerProperties.AckMode parseAckMode(String value) {
