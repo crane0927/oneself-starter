@@ -72,6 +72,96 @@ oneself:
     listener-concurrency: 4
 ```
 
+## 配置字段说明
+| 配置项 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `oneself.kafka.enabled` | boolean | `true` | 是否启用 Starter。 |
+| `oneself.kafka.default-topic` | string | `""` | 默认发送主题。 |
+| `oneself.kafka.bootstrap-servers` | string | `""` | Kafka 地址（bootstrap.servers）。 |
+| `oneself.kafka.security-protocol` | string | `""` | 安全协议（security.protocol）。 |
+| `oneself.kafka.sasl-mechanism` | string | `""` | SASL 机制（sasl.mechanism）。 |
+| `oneself.kafka.sasl-jaas-config` | string | `""` | SASL JAAS 配置。 |
+| `oneself.kafka.ssl-truststore-location` | string | `""` | SSL truststore 路径。 |
+| `oneself.kafka.ssl-truststore-password` | string | `""` | SSL truststore 密码。 |
+| `oneself.kafka.ssl-keystore-location` | string | `""` | SSL keystore 路径。 |
+| `oneself.kafka.ssl-keystore-password` | string | `""` | SSL keystore 密码。 |
+| `oneself.kafka.schema-version` | string | `v1` | 事件 schema 版本。 |
+| `oneself.kafka.ordered-topics` | list | `[]` | 需要顺序的 topic 列表。 |
+| `oneself.kafka.unordered-key-strategy` | enum | `NONE` | 非顺序 topic key 策略：`NONE`/`RANDOM`。 |
+| `oneself.kafka.retry-enabled` | boolean | `true` | 是否启用重试/死信。 |
+| `oneself.kafka.retry-topic-delays` | list | `[1m,10m,1h]` | 重试 topic 延迟级别。 |
+| `oneself.kafka.dlq-suffix` | string | `dlq` | DLQ 后缀。 |
+| `oneself.kafka.local-retry-attempts` | int | `2` | 本地重试次数。 |
+| `oneself.kafka.local-retry-backoff` | duration | `1s` | 本地重试间隔。 |
+| `oneself.kafka.non-retryable-exceptions` | list | `[]` | 不重试异常类名。 |
+| `oneself.kafka.idempotent-store` | enum | `NONE` | 幂等存储：`NONE`/`REDIS`/`DB`。 |
+| `oneself.kafka.idempotent-key-prefix` | string | `kafka:idem:` | 幂等 key 前缀。 |
+| `oneself.kafka.idempotent-processing-ttl` | duration | `10m` | PROCESSING TTL。 |
+| `oneself.kafka.idempotent-done-ttl` | duration | `7d` | DONE TTL。 |
+| `oneself.kafka.idempotent-table-name` | string | `kafka_idempotent_record` | 幂等表名。 |
+| `oneself.kafka.producer-acks` | string | `all` | 生产者 acks。 |
+| `oneself.kafka.producer-delivery-timeout` | duration | `120s` | 发送总超时。 |
+| `oneself.kafka.producer-request-timeout` | duration | `30s` | 单次请求超时。 |
+| `oneself.kafka.producer-linger` | duration | `10ms` | 批量等待时间。 |
+| `oneself.kafka.producer-batch-size` | int | `32768` | 批量大小。 |
+| `oneself.kafka.producer-compression-type` | string | `lz4` | 压缩算法。 |
+| `oneself.kafka.consumer-enable-auto-commit` | boolean | `false` | 是否自动提交 offset。 |
+| `oneself.kafka.consumer-auto-offset-reset` | string | `latest` | offset 重置策略。 |
+| `oneself.kafka.consumer-max-poll-records` | int | `300` | 单批拉取条数。 |
+| `oneself.kafka.consumer-max-poll-interval` | duration | `5m` | 最大处理间隔。 |
+| `oneself.kafka.consumer-session-timeout` | duration | `15s` | 会话超时。 |
+| `oneself.kafka.consumer-heartbeat-interval` | duration | `5s` | 心跳间隔。 |
+| `oneself.kafka.consumer-fetch-max-bytes` | int | `52428800` | 拉取最大字节数。 |
+| `oneself.kafka.consumer-isolation-level` | string | `read_committed` | 隔离级别。 |
+| `oneself.kafka.listener-ack-mode` | string | `MANUAL` | Ack 模式。 |
+| `oneself.kafka.listener-concurrency` | int | `null` | 监听并发数。 |
+
+## 常见组合示例
+
+基础连接：
+```yaml
+oneself:
+  kafka:
+    enabled: true
+    bootstrap-servers: "10.0.0.1:9092,10.0.0.2:9092"
+```
+
+启用顺序 topic：
+```yaml
+oneself:
+  kafka:
+    ordered-topics: ["order.events"]
+```
+
+启用重试与 DLQ：
+```yaml
+oneself:
+  kafka:
+    retry-enabled: true
+    retry-topic-delays: ["1m", "10m", "1h"]
+    dlq-suffix: "dlq"
+    local-retry-attempts: 2
+    local-retry-backoff: 1s
+```
+
+启用 Redis 幂等：
+```yaml
+oneself:
+  kafka:
+    idempotent-store: "REDIS"
+    idempotent-key-prefix: "kafka:idem:"
+    idempotent-processing-ttl: 10m
+    idempotent-done-ttl: 7d
+```
+
+启用 DB 幂等：
+```yaml
+oneself:
+  kafka:
+    idempotent-store: "DB"
+    idempotent-table-name: "kafka_idempotent_record"
+```
+
 ## 使用方式
 
 ### 生产者发送
@@ -128,7 +218,7 @@ public class OrderEventListener {
 import com.oneself.kafka.core.KafkaOrderKey;
 
 public class OrderCreatedEvent {
-    @KafkaOrderKey(\"orderId\")
+    @KafkaOrderKey("orderId")
     private final String orderId;
 
     public OrderCreatedEvent(String orderId) {
@@ -139,18 +229,9 @@ public class OrderCreatedEvent {
 
 未配置 key 且为顺序 topic 时会在运行时抛错。
 
-### 重试与死信
-- 本地重试：`local-retry-attempts` + `local-retry-backoff`。
-- 失败后转发到重试 topic，命名规则：`{topic}.retry.{delay}`。
-- 重试次数超限后转发到 DLQ：`{topic}.{dlq-suffix}`。
-- 统一 header：`x-event-id`、`x-trace-id`、`x-retry-count`、`x-original-topic`、`x-original-partition`、`x-original-offset`、`x-failure-class`、`x-failure-message`。
-
 ### 幂等消费（Redis / DB）
-Starter 提供 `KafkaIdempotentExecutor`，可选 Redis 或 DB 实现：
-- Redis：`idempotent-store=REDIS`，基于 `SETNX` + 两阶段状态。
-- DB：`idempotent-store=DB`，基于唯一键插入与状态更新。
+Starter 提供 `KafkaIdempotentExecutor`，可选 Redis 或 DB 实现。
 
-示例用法：
 ```java
 import com.oneself.kafka.core.KafkaIdempotentExecutor;
 
@@ -170,20 +251,6 @@ public class OrderHandler {
 }
 ```
 
-### 推荐幂等表结构（DB）
-```
-kafka_idempotent_record
-  event_id (PK/Unique)
-  consumer_group
-  topic
-  partition_id
-  offset_id
-  status (PROCESSING/DONE/FAILED)
-  created_at
-  updated_at
-  error_msg
-```
-
 ### Outbox
 Starter 提供 `KafkaOutboxEvent` 与 `KafkaOutboxPublisher` 接口，业务侧可基于本地事务落库并异步发布。
 
@@ -193,3 +260,9 @@ Starter 提供 `KafkaOutboxEvent` 与 `KafkaOutboxPublisher` 接口，业务侧�
 - Envelope 以 JSON 发送，建议配置 `spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer`。
 - 消费侧建议使用 `JsonDeserializer` 并配置 `spring.kafka.consumer.properties.spring.json.trusted.packages`。
 - 若需全局错误处理、重试、并发等策略，可在应用中配置 `KafkaListenerContainerFactory`。
+
+## 企业级增强点（建议）
+- 统一 header 规范：eventId/traceId/retry 信息，便于排障与回溯。
+- 统一异常分类：可重试/不可重试异常分层配置。
+- 统一重试与 DLQ 主题命名，支持回溯重放。
+- 观测能力：生产/消费耗时、失败率、重试与 DLQ 指标。
