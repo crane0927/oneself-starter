@@ -53,6 +53,7 @@ oneself:
 | `oneself.elasticsearch.bulk-max-bytes` | long | `5242880` | 单批最大字节数。 |
 | `oneself.elasticsearch.bulk-flush-interval` | duration | `1s` | 批量刷新间隔。 |
 | `oneself.elasticsearch.bulk-concurrent-requests` | int | `1` | 并发请求数。 |
+| `oneself.elasticsearch.compatibility-mode` | boolean | `false` | 兼容模式（对接 ES 7.x 时开启）。 |
 
 ## 使用方式
 

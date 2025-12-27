@@ -76,6 +76,11 @@ public class OneselfElasticsearchProperties {
     private int bulkConcurrentRequests = 1;
 
     /**
+     * 是否开启兼容模式（用于 ES 7.x）。
+     */
+    private boolean compatibilityMode = false;
+
+    /**
      * 是否Enabled。
      */
     public boolean isEnabled() {
@@ -255,5 +260,19 @@ public class OneselfElasticsearchProperties {
      */
     public void setBulkConcurrentRequests(int bulkConcurrentRequests) {
         this.bulkConcurrentRequests = bulkConcurrentRequests;
+    }
+
+    /**
+     * 是否CompatibilityMode。
+     */
+    public boolean isCompatibilityMode() {
+        return compatibilityMode;
+    }
+
+    /**
+     * 设置CompatibilityMode。
+     */
+    public void setCompatibilityMode(boolean compatibilityMode) {
+        this.compatibilityMode = compatibilityMode;
     }
 }
