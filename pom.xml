@@ -11,14 +11,16 @@
     <groupId>com.oneself</groupId>
     <artifactId>oneself-starter</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
     <name>oneself-starter</name>
     <description>oneself-starter</description>
 
     <properties>
         <java.version>21</java.version>
     </properties>
-    <dependencies>
-    </dependencies>
+    <modules>
+        <module>oneself-redis-spring-boot-starter</module>
+    </modules>
 
     <build>
         <plugins>
