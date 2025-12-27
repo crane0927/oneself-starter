@@ -191,20 +191,14 @@ public class OneselfRedisAutoConfiguration {
             return null;
         }
         String normalized = value.trim().toUpperCase();
-        switch (normalized) {
-            case "MASTER":
-                return ReadFrom.MASTER;
-            case "MASTER_PREFERRED":
-                return ReadFrom.MASTER_PREFERRED;
-            case "REPLICA":
-                return ReadFrom.REPLICA;
-            case "REPLICA_PREFERRED":
-                return ReadFrom.REPLICA_PREFERRED;
-            case "ANY":
-                return ReadFrom.ANY;
-            default:
-                throw new IllegalArgumentException("Unsupported readFrom: " + value);
-        }
+        return switch (normalized) {
+            case "MASTER" -> ReadFrom.MASTER;
+            case "MASTER_PREFERRED" -> ReadFrom.MASTER_PREFERRED;
+            case "REPLICA" -> ReadFrom.REPLICA;
+            case "REPLICA_PREFERRED" -> ReadFrom.REPLICA_PREFERRED;
+            case "ANY" -> ReadFrom.ANY;
+            default -> throw new IllegalArgumentException("Unsupported readFrom: " + value);
+        };
     }
 
     /**
@@ -215,16 +209,12 @@ public class OneselfRedisAutoConfiguration {
             return ClientOptions.DisconnectedBehavior.DEFAULT;
         }
         String normalized = value.trim().toUpperCase();
-        switch (normalized) {
-            case "DEFAULT":
-                return ClientOptions.DisconnectedBehavior.DEFAULT;
-            case "REJECT_COMMANDS":
-                return ClientOptions.DisconnectedBehavior.REJECT_COMMANDS;
-            case "ACCEPT_COMMANDS":
-                return ClientOptions.DisconnectedBehavior.ACCEPT_COMMANDS;
-            default:
-                throw new IllegalArgumentException("Unsupported disconnectedBehavior: " + value);
-        }
+        return switch (normalized) {
+            case "DEFAULT" -> ClientOptions.DisconnectedBehavior.DEFAULT;
+            case "REJECT_COMMANDS" -> ClientOptions.DisconnectedBehavior.REJECT_COMMANDS;
+            case "ACCEPT_COMMANDS" -> ClientOptions.DisconnectedBehavior.ACCEPT_COMMANDS;
+            default -> throw new IllegalArgumentException("Unsupported disconnectedBehavior: " + value);
+        };
     }
 
     /**
