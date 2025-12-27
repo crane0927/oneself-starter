@@ -166,13 +166,15 @@ public class OneselfRedisAutoConfiguration {
             builder.useSsl();
         }
         builder.commandTimeout(properties.getTimeout());
-        builder.clientOptions(ClientOptions.builder()
+        ClientOptions.Builder clientOptions = ClientOptions.builder()
                 .autoReconnect(properties.isAutoReconnect())
                 .disconnectedBehavior(parseDisconnectedBehavior(properties.getDisconnectedBehavior()))
                 .pingBeforeActivateConnection(properties.isPingBeforeActivateConnection())
-                .socketOptions(SocketOptions.builder().connectTimeout(properties.getConnectTimeout()).build())
-                .sslOptions(buildSslOptions(properties))
-                .build());
+                .socketOptions(SocketOptions.builder().connectTimeout(properties.getConnectTimeout()).build());
+        if (properties.isSslEnabled()) {
+            clientOptions.sslOptions(buildSslOptions(properties));
+        }
+        builder.clientOptions(clientOptions.build());
         return builder.build();
     }
 
