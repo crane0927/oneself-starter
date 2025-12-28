@@ -122,6 +122,7 @@ Map/JSON 字段会根据 `@LogEncrypt.name`（或字段名）以及 `oneself.log
 - TraceId/SpanId 从 MDC 读取，使用 Micrometer Tracing 时自动生效。
 - JSON 日志同样应用脱敏规则。
 - 带 `@LogEncrypt` 的字段会按配置进行掩码或密钥加密。
+- `mask` 转换器按普通转换器使用，pattern 中使用 `%mask`（不要写 `%mask(%msg)`），避免被当作复合转换器解析。
 
 ## 企业级增强点（建议）
 - 与 ELK/EFK 打通，统一采集与检索。
