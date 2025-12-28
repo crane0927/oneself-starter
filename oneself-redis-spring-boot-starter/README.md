@@ -5,6 +5,7 @@
 - 自动配置 `RedisTemplate`（Key/HashKey 使用 String 序列化，Value/HashValue 使用 JSON 序列化）。
 - 轻量 `RedisOps` 封装，简化常用 get/set/delete 操作。
 - 可配置 key 前缀，统一缓存与数据键名规范。
+- 连接信息与连接池等参数沿用 Spring Boot `spring.redis.*` 配置。
 
 ## 安装方式
 在应用中引入依赖：
@@ -21,6 +22,13 @@
 `application.yml`:
 
 ```yaml
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      password: ""
 oneself:
   redis:
     enabled: true
@@ -32,33 +40,6 @@ oneself:
     cache-enabled: false
     cache-ttl: 30m
     cache-key-prefix: "cache:"
-    mode: SINGLE
-    host: localhost
-    port: 6379
-    database: 0
-    password: ""
-    nodes: ["127.0.0.1:6379", "127.0.0.1:6380"]
-    sentinel-master: "mymaster"
-    sentinel-nodes: ["127.0.0.1:26379", "127.0.0.1:26380"]
-    sentinel-password: ""
-    ssl-enabled: false
-    ssl-verify-peer: true
-    ssl-truststore: "/path/to/truststore.jks"
-    ssl-truststore-password: ""
-    ssl-keystore: "/path/to/keystore.jks"
-    ssl-keystore-password: ""
-    timeout: 2s
-    connect-timeout: 2s
-    pool-enabled: false
-    pool-max-active: 8
-    pool-max-idle: 8
-    pool-min-idle: 0
-    pool-max-wait: 1s
-    client-name: "order-service"
-    read-from: "MASTER"
-    auto-reconnect: true
-    disconnected-behavior: "DEFAULT"
-    ping-before-activate-connection: false
 ```
 
 ## 配置字段说明
@@ -73,98 +54,70 @@ oneself:
 | `oneself.redis.cache-enabled` | boolean | `false` | 是否启用 Spring Cache 集成。 |
 | `oneself.redis.cache-ttl` | duration | `30m` | 缓存默认 TTL。 |
 | `oneself.redis.cache-key-prefix` | string | `""` | 缓存名称前缀。 |
-| `oneself.redis.mode` | enum | `SINGLE` | 部署模式：`SINGLE`/`CLUSTER`/`SENTINEL`。 |
-| `oneself.redis.host` | string | `localhost` | 单机地址。 |
-| `oneself.redis.port` | int | `6379` | 单机端口。 |
-| `oneself.redis.database` | int | `0` | 数据库索引（单机/哨兵）。 |
-| `oneself.redis.password` | string | `""` | Redis 密码（单机/集群/哨兵数据节点）。 |
-| `oneself.redis.nodes` | list | `[]` | 集群节点（host:port）。 |
-| `oneself.redis.sentinel-master` | string | `""` | Sentinel 主节点名称。 |
-| `oneself.redis.sentinel-nodes` | list | `[]` | Sentinel 节点（host:port）。 |
-| `oneself.redis.sentinel-password` | string | `""` | Sentinel 认证密码。 |
-| `oneself.redis.ssl-enabled` | boolean | `false` | 是否启用 SSL/TLS。 |
-| `oneself.redis.ssl-verify-peer` | boolean | `true` | 是否校验证书。 |
-| `oneself.redis.ssl-truststore` | string | `""` | truststore 路径。 |
-| `oneself.redis.ssl-truststore-password` | string | `""` | truststore 密码。 |
-| `oneself.redis.ssl-keystore` | string | `""` | keystore 路径。 |
-| `oneself.redis.ssl-keystore-password` | string | `""` | keystore 密码。 |
-| `oneself.redis.timeout` | duration | `2s` | 命令超时。 |
-| `oneself.redis.connect-timeout` | duration | `2s` | 连接超时。 |
-| `oneself.redis.pool-enabled` | boolean | `false` | 是否启用连接池。 |
-| `oneself.redis.pool-max-active` | int | `8` | 连接池最大活跃连接数。 |
-| `oneself.redis.pool-max-idle` | int | `8` | 连接池最大空闲连接数。 |
-| `oneself.redis.pool-min-idle` | int | `0` | 连接池最小空闲连接数。 |
-| `oneself.redis.pool-max-wait` | duration | `1s` | 连接池最大等待时间。 |
-| `oneself.redis.client-name` | string | `""` | 客户端名称。 |
-| `oneself.redis.read-from` | string | `""` | 读策略：`MASTER`/`MASTER_PREFERRED`/`REPLICA`/`REPLICA_PREFERRED`/`ANY`。 |
-| `oneself.redis.auto-reconnect` | boolean | `true` | 是否自动重连。 |
-| `oneself.redis.disconnected-behavior` | string | `DEFAULT` | 断连策略：`DEFAULT`/`REJECT_COMMANDS`/`ACCEPT_COMMANDS`。 |
-| `oneself.redis.ping-before-activate-connection` | boolean | `false` | 激活连接前是否发送 PING。 |
 
 ## 常见组合示例
 
 单机模式：
 ```yaml
+spring:
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+      password: ""
 oneself:
   redis:
     enabled: true
-    mode: SINGLE
-    host: 127.0.0.1
-    port: 6379
-    database: 0
-    password: ""
+    key-prefix: order
 ```
 
 集群模式：
 ```yaml
-oneself:
-  redis:
-    enabled: true
-    mode: CLUSTER
-    nodes:
-      - "10.0.0.11:6379"
-      - "10.0.0.12:6379"
-      - "10.0.0.13:6379"
-    password: ""
+spring:
+  data:
+    redis:
+      cluster:
+        nodes:
+          - "10.0.0.11:6379"
+          - "10.0.0.12:6379"
+          - "10.0.0.13:6379"
+      password: ""
 ```
 
 哨兵模式：
 ```yaml
-oneself:
-  redis:
-    enabled: true
-    mode: SENTINEL
-    sentinel-master: "mymaster"
-    sentinel-nodes:
-      - "10.0.0.21:26379"
-      - "10.0.0.22:26379"
-    password: ""
-    sentinel-password: ""
+spring:
+  data:
+    redis:
+      sentinel:
+        master: "mymaster"
+        nodes:
+          - "10.0.0.21:26379"
+          - "10.0.0.22:26379"
+      password: ""
 ```
 
 启用 SSL：
 ```yaml
-oneself:
-  redis:
-    enabled: true
-    ssl-enabled: true
-    ssl-verify-peer: true
-    ssl-truststore: "/path/to/truststore.jks"
-    ssl-truststore-password: "changeit"
-    ssl-keystore: "/path/to/keystore.jks"
-    ssl-keystore-password: "changeit"
+spring:
+  data:
+    redis:
+      ssl: true
 ```
 
 启用连接池：
 ```yaml
-oneself:
-  redis:
-    enabled: true
-    pool-enabled: true
-    pool-max-active: 16
-    pool-max-idle: 8
-    pool-min-idle: 2
-    pool-max-wait: 2s
+spring:
+  data:
+    redis:
+      lettuce:
+        pool:
+          enabled: true
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+          max-wait: 2s
 ```
 
 ## 缓存示例（@Cacheable / @CachePut / @CacheEvict）
@@ -264,10 +217,7 @@ public class OrderCacheService {
 - 可通过 `oneself.redis.enabled=false` 关闭自动装配。
 - 可通过 `metrics-enabled` 与 `logging-enabled` 控制指标与日志埋点。
 - 启用 `cache-enabled` 后会自动配置 `CacheManager`（RedisCacheManager）。
-- 单机模式使用 `host/port/database`；集群模式使用 `nodes`，并可通过 `password` 配置密码。
-- 哨兵模式使用 `sentinel-master` 与 `sentinel-nodes`。
-- 可通过 `sentinel-password` 设置哨兵认证密码，`password` 为 Redis 数据节点密码。
-- SSL 相关参数用于启用 TLS 连接及证书校验。
+- Redis 连接与连接池等配置请使用 Spring Boot 的 `spring.data.redis.*` 系列配置。
 
 ## 企业级增强点（建议）
 - 统一 key 规范：建议使用 `业务域:子域:标识`，配合 `key-prefix` 做环境/租户隔离。
