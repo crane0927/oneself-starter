@@ -19,12 +19,14 @@
         <java.version>21</java.version>
         <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
         <elasticsearch-rest-client.version>8.12.2</elasticsearch-rest-client.version>
+        <springdoc-openapi.version>2.5.0</springdoc-openapi.version>
     </properties>
     <modules>
         <module>oneself-redis-spring-boot-starter</module>
         <module>oneself-kafka-spring-boot-starter</module>
         <module>oneself-logging-spring-boot-starter</module>
         <module>oneself-elasticsearch-spring-boot-starter</module>
+        <module>oneself-swagger-spring-boot-starter</module>
         <module>oneself-starter-test-service</module>
     </modules>
 
