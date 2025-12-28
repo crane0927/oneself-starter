@@ -11,14 +11,14 @@
     <springProperty scope="context" name="LOG_MASK_FIELDS" source="oneself.logging.mask-fields" defaultValue=""/>
     <springProperty scope="context" name="LOG_MASK_FIELDS_KEY" source="oneself.logging.mask-fields-key" defaultValue=""/>
 
-    <conversionRule conversionWord="mask" class="com.oneself.logging.core.MaskingConverter"/>
+    <conversionRule conversionWord="mask" converterClass="com.oneself.logging.core.MaskingConverter"/>
 
     <property name="CONSOLE_PATTERN"
-              value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr([%thread]){faint} %clr(%-5level) %clr(%logger{36}){cyan} traceId=%X{traceId:-} spanId=%X{spanId:-} - %mask(%msg)%n%ex"/>
+              value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr([%thread]){faint} %clr(%-5level) %clr(%logger{36}[%method : %line]){cyan} traceId-[%X{traceId}] spanId-[%X{spanId}] - %mask%n%ex"/>
     <property name="FILE_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} traceId=%X{traceId:-} spanId=%X{spanId:-} - %mask(%msg)%n%ex"/>
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36}[%method : %line] traceId-[%X{traceId}] spanId-[%X{spanId}] - %mask%n%ex"/>
     <property name="ACCESS_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level traceId=%X{traceId:-} spanId=%X{spanId:-} - %msg%n"/>
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level traceId-[%X{traceId}] spanId-[%X{spanId}] - %msg%n"/>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/${APP_NAME}.log</file>
@@ -46,7 +46,7 @@
                 <loggerName/>
                 <threadName/>
                 <pattern>
-                    <pattern>{"message":"%mask(%msg)","traceId":"%X{traceId:-}","spanId":"%X{spanId:-}"}</pattern>
+                    <pattern>{"message":"%mask","traceId":"%X{traceId:-}","spanId":"%X{spanId:-}"}</pattern>
                 </pattern>
                 <stackTrace/>
             </providers>

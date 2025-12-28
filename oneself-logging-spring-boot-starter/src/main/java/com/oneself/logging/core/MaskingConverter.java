@@ -15,12 +15,12 @@ import javax.crypto.spec.SecretKeySpec;
 import org.slf4j.helpers.MessageFormatter;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.pattern.CompositeConverter;
+import ch.qos.logback.classic.pattern.ClassicConverter;
 
 /**
  * 日志脱敏与加密转换器。
  */
-public class MaskingConverter extends CompositeConverter<ILoggingEvent> {
+public class MaskingConverter extends ClassicConverter {
 
     private static final Pattern[] KEY_VALUE_PATTERNS = new Pattern[] {
             Pattern.compile("(?i)(password|passwd|pwd)\\s*[:=]\\s*([^\\s,;]+)"),
@@ -38,19 +38,15 @@ public class MaskingConverter extends CompositeConverter<ILoggingEvent> {
     private volatile List<String> cachedMaskFields = new ArrayList<>();
 
     @Override
-    protected String transform(ILoggingEvent event, String in) {
-        String message;
+    public String convert(ILoggingEvent event) {
         if (event == null) {
-            message = in;
-        } else if (in == null || in.equals(event.getFormattedMessage())) {
-            message = buildMaskedMessage(event);
-        } else {
-            message = in;
+            return null;
         }
+        String message = buildMaskedMessage(event);
         if (message == null) {
             return null;
         }
-        List<FieldRule> rules = event == null ? Collections.emptyList() : collectRules(event.getArgumentArray());
+        List<FieldRule> rules = collectRules(event.getArgumentArray());
         List<String> fixedFields = getMaskFields();
         String defaultKey = resolveDefaultKey();
         return maskRegex(maskJsonString(message, rules, fixedFields, defaultKey));
@@ -219,7 +215,7 @@ public class MaskingConverter extends CompositeConverter<ILoggingEvent> {
 
     private List<FieldRule> collectRules(Object[] args) {
         List<FieldRule> rules = new ArrayList<>();
-        if (args == null || args.length == 0) {
+        if (args == null) {
             return rules;
         }
         for (Object arg : args) {
