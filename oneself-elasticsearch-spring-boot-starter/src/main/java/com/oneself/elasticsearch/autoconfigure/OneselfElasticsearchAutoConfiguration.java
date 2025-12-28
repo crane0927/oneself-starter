@@ -17,11 +17,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
-import org.springframework.boot.elasticsearch.autoconfigure.Rest5ClientBuilderCustomizer;
 import org.springframework.boot.elasticsearch.autoconfigure.ElasticsearchClientAutoConfiguration;
 import org.springframework.boot.elasticsearch.autoconfigure.ElasticsearchRestClientAutoConfiguration;
-import co.elastic.clients.transport.rest5_client.Rest5ClientOptions;
-import co.elastic.clients.transport.rest5_client.low_level.RequestOptions;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
@@ -57,13 +54,6 @@ public class OneselfElasticsearchAutoConfiguration {
                 .setRequestConfigCallback(requestConfigBuilder -> requestConfigBuilder
                         .setConnectTimeout((int) properties.getConnectTimeout().toMillis())
                         .setSocketTimeout((int) properties.getSocketTimeout().toMillis()));
-        if (properties.isCompatibilityMode()) {
-            org.apache.http.Header[] headers = new org.apache.http.Header[] {
-                    new org.apache.http.message.BasicHeader("Accept", "application/vnd.elasticsearch+json;compatible-with=7"),
-                    new org.apache.http.message.BasicHeader("Content-Type", "application/vnd.elasticsearch+json;compatible-with=7")
-            };
-            builder.setDefaultHeaders(headers);
-        }
         if (hasText(properties.getUsername()) && hasText(properties.getPassword())) {
             CredentialsProvider provider = new BasicCredentialsProvider();
             provider.setCredentials(AuthScope.ANY,
@@ -94,33 +84,6 @@ public class OneselfElasticsearchAutoConfiguration {
                                             OneselfElasticsearchProperties properties,
                                             ObjectProvider<BulkIngester<Object>> bulkIngester) {
         return new ElasticsearchOps(client, properties, bulkIngester.getIfAvailable());
-    }
-
-    /**
-     * Rest5Client 兼容模式（供 Spring Boot Elasticsearch 自动配置使用）。
-     */
-    @Bean
-    @ConditionalOnProperty(prefix = "oneself.elasticsearch", name = "compatibility-mode", havingValue = "true")
-    public Rest5ClientBuilderCustomizer rest5ClientBuilderCustomizer() {
-        return builder -> {
-            org.apache.hc.core5.http.Header[] headers = new org.apache.hc.core5.http.Header[] {
-                    new org.apache.hc.core5.http.message.BasicHeader("Accept", "application/vnd.elasticsearch+json;compatible-with=7"),
-                    new org.apache.hc.core5.http.message.BasicHeader("Content-Type", "application/vnd.elasticsearch+json;compatible-with=7")
-            };
-            builder.setDefaultHeaders(headers);
-        };
-    }
-
-    /**
-     * Rest5Client 兼容模式请求头（供 Transport 注入使用）。
-     */
-    @Bean
-    @ConditionalOnProperty(prefix = "oneself.elasticsearch", name = "compatibility-mode", havingValue = "true")
-    public Rest5ClientOptions rest5ClientOptions() {
-        RequestOptions.Builder requestOptions = RequestOptions.DEFAULT.toBuilder();
-        requestOptions.addHeader("Accept", "application/vnd.elasticsearch+json;compatible-with=7");
-        requestOptions.addHeader("Content-Type", "application/vnd.elasticsearch+json;compatible-with=7");
-        return new Rest5ClientOptions.Builder(requestOptions).build();
     }
 
     /**
