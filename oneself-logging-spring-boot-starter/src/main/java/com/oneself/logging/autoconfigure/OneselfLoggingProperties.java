@@ -9,6 +9,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class OneselfLoggingProperties {
 
     /**
+     * 是否启用 JSON 日志文件输出。
+     */
+    private boolean jsonEnabled = false;
+
+    /**
      * 是否启用访问日志。
      */
     private boolean accessEnabled = true;
@@ -48,6 +53,20 @@ public class OneselfLoggingProperties {
      */
     public boolean isAccessEnabled() {
         return accessEnabled;
+    }
+
+    /**
+     * 是否JsonEnabled。
+     */
+    public boolean isJsonEnabled() {
+        return jsonEnabled;
+    }
+
+    /**
+     * 设置JsonEnabled。
+     */
+    public void setJsonEnabled(boolean jsonEnabled) {
+        this.jsonEnabled = jsonEnabled;
     }
 
     /**
