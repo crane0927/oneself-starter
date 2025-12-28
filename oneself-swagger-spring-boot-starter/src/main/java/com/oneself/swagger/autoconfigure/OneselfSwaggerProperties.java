@@ -8,17 +8,29 @@ import java.util.List;
 @ConfigurationProperties(prefix = "oneself.swagger")
 public class OneselfSwaggerProperties {
 
+    /** 是否启用 Starter 自动装配。 */
     private boolean enabled = true;
+    /** 是否启用 GroupedOpenApi 分组。 */
     private boolean groupEnabled = true;
+    /** OpenAPI 标题。 */
     private String title = "Oneself API";
+    /** OpenAPI 描述。 */
     private String description;
+    /** OpenAPI 版本。 */
     private String version = "v1";
+    /** 服务条款 URL。 */
     private String termsOfService;
+    /** GroupedOpenApi 的分组名称。 */
     private String groupName = "default";
+    /** 联系人信息。 */
     private ContactProperties contact = new ContactProperties();
+    /** 许可证信息。 */
     private LicenseProperties license = new LicenseProperties();
+    /** 扫描的包路径。 */
     private List<String> basePackages = new ArrayList<>();
+    /** 需要包含的路径模式。 */
     private List<String> pathsToMatch = new ArrayList<>();
+    /** 需要排除的路径模式。 */
     private List<String> pathsToExclude = new ArrayList<>();
 
     public boolean isEnabled() {
@@ -119,8 +131,11 @@ public class OneselfSwaggerProperties {
 
     public static class ContactProperties {
 
+        /** 联系人名称。 */
         private String name;
+        /** 联系人 URL。 */
         private String url;
+        /** 联系人邮箱。 */
         private String email;
 
         public String getName() {
@@ -150,7 +165,9 @@ public class OneselfSwaggerProperties {
 
     public static class LicenseProperties {
 
+        /** 许可证名称。 */
         private String name;
+        /** 许可证 URL。 */
         private String url;
 
         public String getName() {
